@@ -1,8 +1,11 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 #define RelayPin 7
+#define PotentionmeterPin A0
 
 int weldTime;
+int weldCounter;
+
 unsigned long lastBeat = 0;
 
 void writeIntIntoEEPROM(int address, int number)
@@ -19,7 +22,7 @@ int readIntFromEEPROM(int address)
 void setup() {
   
   pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(A0, INPUT);
+  pinMode(PotentionmeterPin, INPUT);
   pinMode(A7, INPUT);
   pinMode(RelayPin, OUTPUT);
   digitalWrite(RelayPin, HIGH);  
@@ -27,6 +30,9 @@ void setup() {
   Serial.begin(115200);
 
   weldTime = readIntFromEEPROM(0);
+  weldCounter = readIntFromEEPROM(2);
+  
+  if (weldCounter < 0) weldCounter = 1;
 
   delay(100);
   Serial.println("Start");
@@ -36,22 +42,27 @@ void weld() {
   lastBeat = millis();
   Serial.println("Weld");
   
-
   digitalWrite(LED_BUILTIN, HIGH);  
   digitalWrite(RelayPin, LOW);  
   delay(weldTime);
   digitalWrite(RelayPin, HIGH);  
   digitalWrite(LED_BUILTIN, LOW);
   
+  weldCounter++;
+  writeIntIntoEEPROM(2, weldCounter);
+
   int buttonValue = analogRead(A7);
 
   if (buttonValue <300) {    
     delay(200);
   }
 }
+
 void printWeldTime(){
   Serial.print("Weld time: ");
-  Serial.println(weldTime);
+  Serial.print(weldTime);
+  Serial.print(" ");
+  Serial.print(weldCounter);
 }
 
 void loop() {
@@ -66,7 +77,7 @@ void loop() {
 
   if (buttonValue >300 && buttonValue <500) {
     Serial.println("Set Weld time");
-    weldTime = analogRead(A0);
+    weldTime = analogRead(PotentionmeterPin);
     printWeldTime();   
     writeIntIntoEEPROM(0, weldTime);
 

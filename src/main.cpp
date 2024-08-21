@@ -3,8 +3,9 @@
 #include <U8g2lib.h>
 #include <Wire.h>
 
-#define RelayPin 7
+#define RelayPin A1
 #define PotentionmeterPin A0
+#define PedalPin A5
 
 int weldTime;
 int weldCounter;
@@ -43,7 +44,8 @@ void setup() {
   
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(PotentionmeterPin, INPUT);
-  pinMode(A7, INPUT);
+  pinMode(PedalPin, INPUT_PULLUP);
+  
   pinMode(RelayPin, OUTPUT);
   digitalWrite(RelayPin, HIGH);  
 
@@ -74,7 +76,7 @@ void weld() {
   
   writeIntIntoEEPROM(2, weldCounter);
 
-  int buttonValue = analogRead(A7);
+  int buttonValue = analogRead(PedalPin);
 
   if (buttonValue <300) {    
     delay(200);
@@ -86,6 +88,7 @@ void printWeldTime(){
   Serial.print(weldTime);
   Serial.print(" ");
   Serial.println(weldCounter);
+  Serial.println(analogRead(PedalPin));
 
   u8g2.firstPage();
   do {
@@ -111,28 +114,27 @@ void printWeldTime(){
 void loop() {
   // put your main code here, to run repeatedly:
   
-  int buttonValue = analogRead(A7);
+  int buttonValue = analogRead(PedalPin);
 
   if (buttonValue <300) {
     weld();
     printWeldTime();  
 
-    buttonValue = analogRead(A7);
-    while (buttonValue<1000) {
+    buttonValue = analogRead(PedalPin);
+    while (buttonValue<500) {
       delay(50);
-      buttonValue = analogRead(A7);      
+      buttonValue = analogRead(PedalPin);      
     }
     delay(500);
   }
 
-  if (buttonValue >300 && buttonValue <500) {
-    Serial.println("Set Weld time");
-    weldTime = analogRead(PotentionmeterPin) / 2;
-    printWeldTime();   
-    writeIntIntoEEPROM(0, weldTime);
+  
+  //Serial.println("Set Weld time");
+  weldTime = analogRead(PotentionmeterPin) / 2;
+  //printWeldTime();   
+  //writeIntIntoEEPROM(0, weldTime);
 
-    delay(1000);
-  }
+  
   
   if (millis() % 1000 == 0 ) {
     

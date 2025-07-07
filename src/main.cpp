@@ -11,7 +11,7 @@ int weldTime;
 int weldCounter;
 
 unsigned long lastBeat = 0;
-
+x
 /*
   U8g2lib Example Overview:
     Frame Buffer Examples: clearBuffer/sendBuffer. Fast, but may not work with all Arduino boards because of RAM consumption
